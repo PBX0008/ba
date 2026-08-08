@@ -9,12 +9,15 @@
   };
   const saveJSON = (key, value) => localStorage.setItem(key, JSON.stringify(value));
   const escapeHTML = (value) => String(value ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;'}[c]));
-  const easeOutCubic = (t) => 1 - Math.pow(1 - t, 3);
+  // Smootherstep gives zero velocity at both ends, avoiding abrupt starts/stops.
+  const smootherstep = (t) => t * t * t * (t * (t * 6 - 15) + 10);
 
   let catalog = [];
   let results = getJSON(RESULTS_KEY, {});
   let runStates = getJSON(STATE_KEY, {});
-  let animationToken = 0;
+  let viewportObserver = null;
+  const animationTokens = new WeakMap();
+  const ZERO_DASHBOARD = {total:0,used:0,unused:0,correct:0,incorrect:0,partial:0,usageP:0,unusedP:0,correctP:0,incorrectP:0,partialP:0};
 
   function summarizeState(test, state) {
     const total = Number(test.questions || state?.questions?.length || 0);
@@ -148,31 +151,120 @@
     }
   }
 
-  function animateDashboardAndCards() {
-    const token = ++animationToken;
-    const target = dashboardTargets();
-    const cards = [...document.querySelectorAll('.test-card')];
-    const zero = {total:0,used:0,unused:0,correct:0,incorrect:0,partial:0,usageP:0,unusedP:0,correctP:0,incorrectP:0,partialP:0};
-    setDashboardFrame(zero);
-    cards.forEach(card => cardFrame(card, card.__stats, 0));
+  function cancelAnimation(element) {
+    if (!element) return;
+    animationTokens.set(element, (animationTokens.get(element) || 0) + 1);
+  }
 
-    const start = performance.now();
-    const duration = 950;
+  function animateProgress(element, duration, renderFrame, delay = 0) {
+    const token = (animationTokens.get(element) || 0) + 1;
+    animationTokens.set(element, token);
+    renderFrame(0);
+
+    const begin = performance.now() + Math.max(0, delay);
     const tick = (now) => {
-      if (token !== animationToken) return;
-      const raw = Math.min(1, (now - start) / duration);
-      const p = easeOutCubic(raw);
-      const v = {};
-      Object.keys(target).forEach(k => v[k] = Math.round(target[k] * p));
-      setDashboardFrame(v);
-      cards.forEach(card => cardFrame(card, card.__stats, p));
-      if (raw < 1) requestAnimationFrame(tick);
-      else {
-        setDashboardFrame(target);
-        cards.forEach(card => cardFrame(card, card.__stats, 1));
+      if (animationTokens.get(element) !== token) return;
+      if (now < begin) {
+        requestAnimationFrame(tick);
+        return;
       }
+      const raw = Math.min(1, (now - begin) / duration);
+      const progress = smootherstep(raw);
+      renderFrame(progress);
+      if (raw < 1) requestAnimationFrame(tick);
+      else renderFrame(1);
     };
-    setTimeout(() => requestAnimationFrame(tick), 110);
+    requestAnimationFrame(tick);
+  }
+
+  function resetOverviewAnimation() {
+    const panel = document.querySelector('.overview-panel');
+    if (panel) cancelAnimation(panel);
+    setDashboardFrame(ZERO_DASHBOARD);
+  }
+
+  function animateOverviewIn() {
+    const panel = document.querySelector('.overview-panel');
+    if (!panel) return;
+    const target = dashboardTargets();
+    animateProgress(panel, 1350, (progress) => {
+      const frame = {};
+      Object.keys(target).forEach((key) => {
+        frame[key] = Math.round(target[key] * progress);
+      });
+      setDashboardFrame(frame);
+    }, 45);
+  }
+
+  function resetCardAnimation(card) {
+    if (!card?.__stats) return;
+    cancelAnimation(card);
+    cardFrame(card, card.__stats, 0);
+  }
+
+  function animateCardIn(card) {
+    if (!card?.__stats) return;
+    animateProgress(card, 1220, (progress) => cardFrame(card, card.__stats, progress), 35);
+  }
+
+  function setVisualEntryState(element, visible) {
+    if (!element) return;
+    if (visible) {
+      // Two frames ensure the browser paints the reset state before replaying the transition.
+      requestAnimationFrame(() => requestAnimationFrame(() => element.classList.add('is-in-viewport')));
+    } else {
+      element.classList.remove('is-in-viewport');
+    }
+  }
+
+  function setupViewportAnimations() {
+    if (viewportObserver) viewportObserver.disconnect();
+
+    const overview = document.querySelector('.overview-panel');
+    const cards = [...document.querySelectorAll('.test-card')];
+    const visualOnly = [document.querySelector('.selector-header'), document.querySelector('.selector-footer')].filter(Boolean);
+    const observed = [overview, ...cards, ...visualOnly].filter(Boolean);
+
+    observed.forEach((element) => {
+      element.classList.add('viewport-transition');
+      element.classList.remove('is-in-viewport');
+      element.dataset.viewportInside = '0';
+    });
+    resetOverviewAnimation();
+    cards.forEach(resetCardAnimation);
+
+    if (!('IntersectionObserver' in window)) {
+      observed.forEach((element) => element.classList.add('is-in-viewport'));
+      setDashboardFrame(dashboardTargets());
+      cards.forEach((card) => cardFrame(card, card.__stats, 1));
+      return;
+    }
+
+    viewportObserver = new IntersectionObserver((entries) => {
+      entries.forEach((entry) => {
+        const element = entry.target;
+        if (entry.isIntersecting) {
+          if (element.dataset.viewportInside === '1') return;
+          element.dataset.viewportInside = '1';
+          setVisualEntryState(element, true);
+          if (element.classList.contains('overview-panel')) animateOverviewIn();
+          else if (element.classList.contains('test-card')) animateCardIn(element);
+        } else {
+          if (element.dataset.viewportInside === '0') return;
+          element.dataset.viewportInside = '0';
+          setVisualEntryState(element, false);
+          if (element.classList.contains('overview-panel')) resetOverviewAnimation();
+          else if (element.classList.contains('test-card')) resetCardAnimation(element);
+          else cancelAnimation(element);
+        }
+      });
+    }, {
+      root:null,
+      rootMargin:'0px',
+      threshold:[0, 0.01, 0.12, 0.35, 0.7]
+    });
+
+    observed.forEach((element) => viewportObserver.observe(element));
   }
 
   function renderCatalog() {
@@ -240,10 +332,56 @@
     results = getJSON(RESULTS_KEY, {});
     runStates = getJSON(STATE_KEY, {});
     renderCatalog();
-    animateDashboardAndCards();
+    setupViewportAnimations();
+  }
+
+  function setupPurposeModal() {
+    const modal = $('purposeVisionModal');
+    const openBtn = $('purposeInfoBtn');
+    const closeBtn = $('purposeModalClose');
+    if (!modal || !openBtn || !closeBtn) return;
+
+    let lastFocused = null;
+    const modalCard = modal.querySelector('.purpose-modal-card');
+
+    const openModal = () => {
+      lastFocused = document.activeElement;
+      modal.classList.add('is-open');
+      modal.setAttribute('aria-hidden', 'false');
+      document.body.classList.add('purpose-modal-open');
+      requestAnimationFrame(() => modalCard?.focus({ preventScroll:true }));
+    };
+
+    const closeModal = () => {
+      if (!modal.classList.contains('is-open')) return;
+      modal.classList.remove('is-open');
+      modal.setAttribute('aria-hidden', 'true');
+      document.body.classList.remove('purpose-modal-open');
+      if (lastFocused && typeof lastFocused.focus === 'function') lastFocused.focus({ preventScroll:true });
+    };
+
+    openBtn.addEventListener('click', openModal);
+    closeBtn.addEventListener('click', closeModal);
+    modal.querySelectorAll('[data-purpose-close]').forEach((node) => node.addEventListener('click', closeModal));
+
+    document.addEventListener('keydown', (event) => {
+      if (!modal.classList.contains('is-open')) return;
+      if (event.key === 'Escape') {
+        event.preventDefault();
+        closeModal();
+        return;
+      }
+      if (event.key !== 'Tab') return;
+      const focusable = [...modal.querySelectorAll('button, [href], [tabindex]:not([tabindex=\"-1\"])')].filter((el) => !el.disabled && el.offsetParent !== null);
+      if (!focusable.length) return;
+      const first = focusable[0], last = focusable[focusable.length - 1];
+      if (event.shiftKey && document.activeElement === first) { event.preventDefault(); last.focus(); }
+      else if (!event.shiftKey && document.activeElement === last) { event.preventDefault(); first.focus(); }
+    });
   }
 
   async function init() {
+    setupPurposeModal();
     $('clearProgressBtn')?.addEventListener('click', () => {
       if (!confirm('Reset all saved test progress and results?')) return;
       localStorage.removeItem(RESULTS_KEY);

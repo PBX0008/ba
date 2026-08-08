@@ -11,6 +11,7 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Rounded:opsz,wght,FILL,GRAD@24,400,1,0" />
     <link rel="stylesheet" href="assets/css/main.css" />
+    <script src="assets/auth.js"></script>
     <noscript><link rel="stylesheet" href="assets/css/noscript.css" /></noscript>
   </head>
   <body class="is-preload">
@@ -27,13 +28,32 @@
           <nav aria-label="Main software navigation">
             <ul>
               <li class="center-action">
-                <a href="main.html" class="launch-button" aria-label="Open NCLEX RN main page" title="Open NCLEX RN main page">
+                <a href="main.html" id="launchButton" class="launch-button" aria-label="Open NCLEX RN main page" title="Open NCLEX RN main page">
                   <span class="material-symbols-rounded" aria-hidden="true">home</span>
                   <span class="button-text">OPEN APP</span>
                 </a>
               </li>
             </ul>
           </nav>
+
+          <section class="device-auth-panel" id="deviceAuthPanel" aria-label="Device authentication">
+            <form id="deviceAuthForm" class="device-auth-form" autocomplete="off">
+              <label for="deviceAuthPassword">AUTHENTICATION PASSWORD</label>
+              <div class="device-auth-entry">
+                <input id="deviceAuthPassword" name="password" type="password" inputmode="text" autocomplete="off" autocapitalize="none" spellcheck="false" placeholder="Enter password" aria-describedby="deviceAuthStatus" />
+                <button type="submit" id="deviceAuthSubmit">AUTHENTICATE</button>
+              </div>
+            </form>
+            <p class="device-auth-status" id="deviceAuthStatus" role="status" aria-live="polite"></p>
+            <div class="device-auth-active" id="deviceAuthActive" hidden>
+              <span class="material-symbols-rounded" aria-hidden="true">verified_user</span>
+              <div>
+                <strong>Device Authenticated</strong>
+                <span id="deviceAuthRemaining">Remaining: --</span>
+                <small id="deviceAuthExpiry"></small>
+              </div>
+            </div>
+          </section>
         </header>
         <footer id="footer">
           <span class="copyright">
@@ -45,8 +65,99 @@
       </div>
     </div>
     <script>
-      window.addEventListener('load', () => document.body.classList.remove('is-preload'));
-      window.onorientationchange = () => { document.body.scrollTop = 0; };
+      (function () {
+        const launchButton = document.getElementById('launchButton');
+        const authPanel = document.getElementById('deviceAuthPanel');
+        const authForm = document.getElementById('deviceAuthForm');
+        const passwordInput = document.getElementById('deviceAuthPassword');
+        const submitButton = document.getElementById('deviceAuthSubmit');
+        const statusText = document.getElementById('deviceAuthStatus');
+        const activeBox = document.getElementById('deviceAuthActive');
+        const remainingText = document.getElementById('deviceAuthRemaining');
+        const expiryText = document.getElementById('deviceAuthExpiry');
+        let countdownTimer = null;
+
+        function setLocked(locked) {
+          launchButton.classList.toggle('auth-locked', locked);
+          launchButton.setAttribute('aria-disabled', locked ? 'true' : 'false');
+        }
+
+        function showLogin(message, isError) {
+          authForm.hidden = false;
+          activeBox.hidden = true;
+          authPanel.classList.remove('is-authenticated');
+          setLocked(true);
+          statusText.textContent = message || 'Enter the current time-bound password to activate this device for 3 months.';
+          statusText.classList.toggle('is-error', Boolean(isError));
+          if (countdownTimer) {
+            clearInterval(countdownTimer);
+            countdownTimer = null;
+          }
+        }
+
+        function updateActiveState() {
+          const current = window.PBXAuth.status();
+          if (!current.valid) {
+            const msg = current.reason === 'expired'
+              ? 'Authentication expired. Enter a new password to reactivate this device.'
+              : current.reason === 'clock'
+                ? 'Authentication could not be verified because the device clock moved backward.'
+                : 'Enter the current time-bound password to activate this device for 3 months.';
+            showLogin(msg, current.reason === 'expired' || current.reason === 'clock');
+            return;
+          }
+
+          authForm.hidden = true;
+          activeBox.hidden = false;
+          authPanel.classList.add('is-authenticated');
+          statusText.textContent = '';
+          statusText.classList.remove('is-error');
+          setLocked(false);
+          remainingText.textContent = 'Remaining: ' + window.PBXAuth.formatRemaining(current.remainingMs);
+          expiryText.textContent = 'Valid until ' + window.PBXAuth.formatIST(current.state.expiresAt);
+        }
+
+        function startCountdown() {
+          if (countdownTimer) clearInterval(countdownTimer);
+          updateActiveState();
+          countdownTimer = setInterval(updateActiveState, 1000);
+        }
+
+        launchButton.addEventListener('click', function (event) {
+          if (!window.PBXAuth.status().valid) {
+            event.preventDefault();
+            showLogin('Authenticate this device before opening the app.', true);
+            passwordInput.focus();
+          }
+        });
+
+        authForm.addEventListener('submit', function (event) {
+          event.preventDefault();
+          submitButton.disabled = true;
+          const result = window.PBXAuth.authenticate(passwordInput.value);
+          passwordInput.value = '';
+          submitButton.disabled = false;
+
+          if (!result.ok) {
+            const message = result.reason === 'storage'
+              ? 'Authentication cannot be saved because local browser storage is unavailable.'
+              : 'Invalid or expired password. Use the password for the current IST time.';
+            showLogin(message, true);
+            passwordInput.focus();
+            return;
+          }
+
+          startCountdown();
+        });
+
+        window.addEventListener('storage', startCountdown);
+        window.addEventListener('pageshow', startCountdown);
+        window.addEventListener('focus', updateActiveState);
+        window.addEventListener('load', () => document.body.classList.remove('is-preload'));
+        window.onorientationchange = () => { document.body.scrollTop = 0; };
+
+        startCountdown();
+      })();
     </script>
   </body>
 </html>

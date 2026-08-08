@@ -2071,3 +2071,184 @@ body {
 /* v96: login/password and mandatory location removed */
 .welcome-access-card { display: none !important; }
 #header nav a.launch-button.is-disabled { opacity: 1 !important; pointer-events: auto !important; cursor: pointer !important; }
+
+/* --- v100: 3-month device authentication (IST time-key) --- */
+.device-auth-panel {
+  width: min(92vw, 430px);
+  margin: .9rem auto 0;
+  text-align: center;
+}
+
+.device-auth-form {
+  display: grid;
+  gap: .48rem;
+}
+
+.device-auth-form[hidden],
+.device-auth-active[hidden] {
+  display: none !important;
+}
+
+.device-auth-form label {
+  color: rgba(255,255,255,.9);
+  font-size: .7rem;
+  font-weight: 800;
+  letter-spacing: .075em;
+  line-height: 1.25;
+}
+
+.device-auth-entry {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: .48rem;
+  align-items: stretch;
+}
+
+.device-auth-entry input {
+  width: 100%;
+  min-width: 0;
+  height: 2.8rem;
+  border: 1px solid rgba(255,255,255,.42);
+  border-radius: .72rem;
+  background: rgba(255,255,255,.16);
+  color: #fff;
+  padding: 0 .82rem;
+  font-family: 'Source Sans Pro', sans-serif;
+  font-size: .9rem;
+  font-weight: 600 !important;
+  letter-spacing: .025em;
+  outline: 0;
+  box-shadow: inset 0 1px 0 rgba(255,255,255,.08);
+}
+
+.device-auth-entry input::placeholder {
+  color: rgba(255,255,255,.62);
+}
+
+.device-auth-entry input:focus {
+  border-color: rgba(255,255,255,.9);
+  box-shadow: 0 0 0 3px rgba(255,255,255,.15);
+}
+
+.device-auth-entry button {
+  min-height: 2.8rem;
+  border: 1px solid rgba(255,255,255,.72);
+  border-radius: .72rem;
+  background: rgba(255,255,255,.93);
+  color: #08304f;
+  padding: 0 .9rem;
+  font-family: 'Source Sans Pro', sans-serif;
+  font-size: .72rem;
+  font-weight: 900;
+  letter-spacing: .055em;
+  cursor: pointer;
+  transition: transform .18s ease, background-color .18s ease, box-shadow .18s ease;
+}
+
+.device-auth-entry button:hover {
+  background: #fff;
+  box-shadow: 0 .45rem 1.1rem rgba(0,0,0,.14);
+  transform: translateY(-1px);
+}
+
+.device-auth-entry button:active { transform: translateY(0); }
+.device-auth-entry button:disabled { opacity: .65; cursor: wait; }
+
+.device-auth-status {
+  min-height: 1.15rem;
+  margin: .48rem 0 0;
+  color: rgba(255,255,255,.82);
+  font-size: .72rem;
+  font-weight: 400 !important;
+  letter-spacing: 0;
+  line-height: 1.35;
+}
+
+.device-auth-status.is-error {
+  color: #fff;
+  font-weight: 700 !important;
+}
+
+.device-auth-active {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: .55rem;
+  margin: 0 auto;
+  padding: .58rem .85rem;
+  border: 1px solid rgba(255,255,255,.3);
+  border-radius: .85rem;
+  background: rgba(2, 20, 38, .24);
+  color: #fff;
+  text-align: left;
+  box-shadow: 0 .55rem 1.5rem rgba(0,0,0,.1);
+  backdrop-filter: blur(5px);
+  -webkit-backdrop-filter: blur(5px);
+}
+
+.device-auth-active > .material-symbols-rounded {
+  flex: 0 0 auto;
+  font-size: 1.45rem;
+}
+
+.device-auth-active > div {
+  display: grid;
+  gap: .04rem;
+}
+
+.device-auth-active strong {
+  font-size: .77rem;
+  font-weight: 800;
+  line-height: 1.25;
+  letter-spacing: .025em;
+}
+
+.device-auth-active span:not(.material-symbols-rounded) {
+  font-size: .72rem;
+  font-weight: 700;
+  line-height: 1.3;
+  letter-spacing: .015em;
+}
+
+.device-auth-active small {
+  color: rgba(255,255,255,.72);
+  font-size: .63rem;
+  line-height: 1.3;
+  letter-spacing: 0;
+}
+
+#header nav a.launch-button.auth-locked {
+  opacity: .62 !important;
+  filter: saturate(.72);
+  cursor: not-allowed !important;
+}
+
+@media screen and (max-width: 520px) {
+  .device-auth-panel {
+    width: min(94vw, 370px);
+    margin-top: .72rem;
+  }
+
+  .device-auth-entry {
+    grid-template-columns: 1fr;
+  }
+
+  .device-auth-entry input,
+  .device-auth-entry button {
+    height: 2.55rem;
+    min-height: 2.55rem;
+  }
+
+  .device-auth-active {
+    max-width: 100%;
+    padding: .52rem .7rem;
+  }
+}
+
+@media screen and (max-height: 690px) and (max-width: 736px) {
+  .device-auth-panel { margin-top: .5rem; }
+  .device-auth-form label { font-size: .64rem; }
+  .device-auth-status { font-size: .66rem; margin-top: .32rem; }
+  .device-auth-entry input,
+  .device-auth-entry button { height: 2.35rem; min-height: 2.35rem; }
+}
