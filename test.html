@@ -430,6 +430,21 @@ body.night-mode .ai-header {
   transition: color 0.2s ease;
 }
 .strip-btn:hover{ color:#ffe45c; background:transparent; }
+.practice-mode-btn{
+  min-width:112px;
+  justify-content:center;
+  border-left:2px solid #ffffff;
+  margin-left:2px;
+}
+.practice-mode-btn .mode-dot{
+  width:8px;height:8px;border-radius:50%;background:#60d394;display:inline-block;margin-right:7px;box-shadow:0 0 0 2px rgba(255,255,255,.2);
+}
+.practice-mode-btn.untutored .mode-dot{background:#ffd166;}
+body.untutored-mode .check-btn,
+body.untutored-mode .mobile-check-cell{display:none !important;}
+body.untutored-mode .mobile-bottombar{grid-template-columns:1fr 1fr;}
+body.untutored-mode .main:not(.review-active) #rightPanel{display:none !important;}
+body.untutored-mode .main:not(.review-active){grid-template-columns:1fr 0 0 !important;}
 .action-icon-btn{ justify-content:center; padding:0 14px; }
 .utility-btn{ font-size:18px; }
 .strip-separator{
@@ -1518,6 +1533,22 @@ body.text-size-3 { --desktop-content-size: 19px; --desktop-content-line: 1.72; }
     cursor: pointer;
   }
 
+  .mobile-mode-btn {
+    width:auto;
+    min-width:66px;
+    padding:0 5px;
+    gap:3px;
+    font-size:9px;
+    font-weight:800;
+    line-height:1;
+  }
+
+  .mobile-mode-btn .mode-dot {
+    width:7px;height:7px;border-radius:50%;background:#60d394;display:inline-block;
+  }
+
+  .mobile-mode-btn.untutored .mode-dot { background:#ffd166; }
+
   .mobile-icon-btn .material-symbols-outlined {
     width: 26px;
     height: 26px;
@@ -1953,6 +1984,9 @@ body.text-size-3 { --desktop-content-size: 19px; --desktop-content-line: 1.72; }
     <button class="mobile-icon-btn" type="button" onclick="openCalc()" aria-label="Calculator">
       <span class="material-symbols-outlined" aria-hidden="true">calculate</span>
     </button>
+    <button id="mobilePracticeModeBtn" class="mobile-icon-btn mobile-mode-btn" type="button" onclick="togglePracticeMode()" aria-label="Toggle tutored or untutored mode" title="Toggle practice mode">
+      <span class="mode-dot" aria-hidden="true"></span><span class="mode-label">Tutored</span>
+    </button>
   </div>
   <div class="mobile-strip-group">
     <div class="mobile-text-size-wrapper">
@@ -1977,6 +2011,7 @@ body.text-size-3 { --desktop-content-size: 19px; --desktop-content-line: 1.72; }
     <button class="strip-btn" type="button" onclick="suspendTest()"><span><span class="material-symbols-outlined google-icon" aria-hidden="true">pause_circle</span> Pause</span></button>
     <span class="strip-separator"></span>
     <button class="strip-btn" type="button" onclick="openCalc()"><span><span class="material-symbols-outlined google-icon" aria-hidden="true">calculate</span> Calc.</span></button>
+    <button id="practiceModeBtn" class="strip-btn practice-mode-btn" type="button" onclick="togglePracticeMode()" aria-label="Toggle tutored or untutored mode" title="Toggle practice mode"><span><span class="mode-dot" aria-hidden="true"></span><span class="mode-label">Tutored</span></span></button>
 
   </div>
   <div class="calc-right">
@@ -2003,7 +2038,7 @@ body.text-size-3 { --desktop-content-size: 19px; --desktop-content-line: 1.72; }
     <div id="caseStudyContainer"></div>
     <div class="qtext" id="question">Load your question dataset to begin testing.</div>
     <div id="options"></div>
-    <div class="check-btn"><button onclick="check()">Check</button></div>
+    <div class="check-btn" id="desktopCheckWrap"><button onclick="check()">Check</button></div>
 
     <!-- ADAPTIVE RESULT BOX (Space-Efficient) -->
     <div class="result-box" id="questionResultBox">
@@ -2048,8 +2083,8 @@ body.text-size-3 { --desktop-content-size: 19px; --desktop-content-line: 1.72; }
       <span>Prev</span>
     </button>
   </div>
-  <div class="mobile-nav-cell">
-    <button class="mobile-nav-btn mobile-check-btn" type="button" onclick="check()">Check</button>
+  <div class="mobile-nav-cell mobile-check-cell">
+    <button class="mobile-nav-btn mobile-check-btn" id="mobileCheckBtn" type="button" onclick="check()">Check</button>
   </div>
   <div class="mobile-nav-cell">
     <button class="mobile-nav-btn" type="button" onclick="nextQ()">
@@ -2126,6 +2161,7 @@ let DATA={questionList:[]};
 let qIndex=0, selected=[], score=0, total=0, sec=0;
 let timer=null, questionsLoaded=false;
 let showScore=true, showTime=true, showQuestionNumbers=true;
+let practiceMode='tutored', reviewMode=false;
 let currentFileBaseName="";
 
 /* Image Zoom & Pan State */
@@ -2170,15 +2206,87 @@ function stopTimer(){
 
 function syncTimerForCurrentQuestion(){
   const q = DATA.questionList[qIndex];
-  if(!questionsLoaded || !q){
+  if(!questionsLoaded || !q || reviewMode){
     stopTimer();
     return;
   }
-  if(q.submitted){
+  if(practiceMode === 'tutored' && q.submitted){
     stopTimer();
   } else {
     startTimer();
   }
+}
+
+function updatePracticeModeUI(){
+  const untutored = practiceMode === 'untutored';
+  document.body.classList.toggle('untutored-mode', untutored && !reviewMode);
+  const mainEl = document.querySelector('.main');
+  if(mainEl) mainEl.classList.toggle('review-active', !!reviewMode);
+  [document.getElementById('practiceModeBtn'), document.getElementById('mobilePracticeModeBtn')].forEach(btn=>{
+    if(!btn) return;
+    btn.classList.toggle('untutored', untutored);
+    const label = btn.querySelector('.mode-label');
+    if(label) label.textContent = untutored ? 'Untutored' : 'Tutored';
+    btn.setAttribute('aria-pressed', untutored ? 'true' : 'false');
+  });
+}
+
+function togglePracticeMode(){
+  if(reviewMode) return;
+  practiceMode = practiceMode === 'tutored' ? 'untutored' : 'tutored';
+  updatePracticeModeUI();
+  render();
+  syncTimerForCurrentQuestion();
+  try { window.parent.postMessage({type:'nclex-progress'}, '*'); } catch (_) {}
+}
+
+function scoreQuestion(q){
+  if(!q) return;
+  const correct = String(q.correctAnswer || '').split(',').filter(Boolean).map(x => +x - 1);
+  const answers = Array.isArray(q.userAnswer) ? q.userAnswer : [];
+  let correctSelected = 0, incorrectSelected = 0;
+  answers.forEach(i => correct.includes(i) ? correctSelected++ : incorrectSelected++);
+  q.qScore = Math.max(0, correctSelected - incorrectSelected);
+  q.qMax = Math.max(1, correct.length || 1);
+}
+
+function recalculateScoreTotals(){
+  score = 0; total = 0;
+  DATA.questionList.forEach(q=>{
+    if(!q.submitted) return;
+    score += Math.max(0, Number(q.qScore || 0));
+    total += Math.max(1, Number(q.qMax || String(q.correctAnswer || '').split(',').filter(Boolean).length || 1));
+  });
+  updateTopBar();
+}
+
+function prepareTestForCompletion(){
+  stopTimer();
+  const current = DATA.questionList[qIndex];
+  if(current && !current.finalTimeTaken) current.finalTimeTaken = getActualTimeSpentSeconds(current);
+  if(practiceMode === 'untutored'){
+    DATA.questionList.forEach(q=>{
+      scoreQuestion(q);
+      q.submitted = true;
+      q.lastUpdated = new Date().toISOString();
+    });
+    recalculateScoreTotals();
+  }
+}
+
+function enterReviewMode(){
+  stopTimer();
+  reviewMode = true;
+  DATA.questionList.forEach(q=>{
+    scoreQuestion(q);
+    q.submitted = true;
+  });
+  recalculateScoreTotals();
+  qIndex = 0;
+  selected = DATA.questionList[0]?.userAnswer || [];
+  updatePracticeModeUI();
+  render();
+  scrollMobileResultToTop();
 }
 
 function updateTopBar(){
@@ -2696,13 +2804,12 @@ function render(){
   selected=q.userAnswer||[];
   syncTimerForCurrentQuestion();
 
+  const feedbackVisible = q.submitted && (practiceMode === 'tutored' || reviewMode);
   const mainEl = document.querySelector('.main');
   if (mainEl) {
-    if (q.submitted) {
-      mainEl.classList.add('show-result');
-    } else {
-      mainEl.classList.remove('show-result');
-    }
+    if (feedbackVisible) mainEl.classList.add('show-result');
+    else mainEl.classList.remove('show-result');
+    mainEl.classList.toggle('review-active', !!reviewMode);
   }
 
   updateTopBar();
@@ -2720,7 +2827,7 @@ function render(){
     q.renderedQuestionText = question.innerHTML;
   }
 
-  if(q.submitted){
+  if(feedbackVisible){
     if (q.renderedExplanationText) {
       explanation.innerHTML = q.renderedExplanationText;
     } else {
@@ -2734,7 +2841,7 @@ function render(){
     const correct = q.correctAnswer.split(",").map(x => +x - 1);
     updateAdaptiveResultBox(q, selected, correct, false);
   } else {
-    explanation.innerText="Explanation will appear here after clicking Check.";
+    explanation.innerText = practiceMode === 'untutored' ? "Untutored mode: explanations are available during final review." : "Explanation will appear here after clicking Check.";
     document.getElementById("questionResultBox").style.display = "none";
   }
 
@@ -2744,23 +2851,25 @@ function render(){
   if (leftPanel) leftPanel.scrollTop = 0;
   if (rightPanel) rightPanel.scrollTop = 0;
 
-  const correct = q.submitted ? q.correctAnswer.split(",").map(x => +x - 1) : [];
+  const correct = feedbackVisible ? q.correctAnswer.split(",").map(x => +x - 1) : [];
   options.innerHTML="";
 
   q.answerChoiceList.forEach((c,i)=>{
     const d=document.createElement("div");
     d.className="option";
     if(selected.includes(i)) d.classList.add("selected");
-    if(q.submitted){
+    if(feedbackVisible){
       if(correct.includes(i)) d.classList.add("correct");
       if(selected.includes(i)&&!correct.includes(i)) d.classList.add("wrong");
     }
     d.innerHTML=c.choice;
     d.onclick=()=>{
-      if(q.submitted) return;
+      if(feedbackVisible || (q.submitted && practiceMode === 'untutored' && !reviewMode)) return;
       selected.includes(i)?selected=selected.filter(x=>x!==i):selected.push(i);
-      q.userAnswer=selected;
+      q.userAnswer=[...selected];
+      q.lastUpdated = new Date().toISOString();
       render();
+      try { window.parent.postMessage({type:'nclex-progress'}, '*'); } catch (_) {}
     };
     options.appendChild(d);
   });
@@ -2768,23 +2877,14 @@ function render(){
 
 function check(){
   const q = DATA.questionList[qIndex];
-  if(!q || q.submitted) return;
+  if(!q || q.submitted || (practiceMode === 'untutored' && !reviewMode)) return;
   q.finalTimeTaken = getActualTimeSpentSeconds(q);
   q.submitted = true;
   q.lastUpdated = new Date().toISOString();
+  scoreQuestion(q);
+  recalculateScoreTotals();
   const correct = q.correctAnswer.split(",").map(x => +x - 1);
-  let cs = 0, is = 0;
-  selected.forEach(i => correct.includes(i) ? cs++ : is++);
-
-  let qPoints = Math.max(0, cs - is);
-  q.qScore = qPoints;
-  q.qMax = correct.length;
-
-  score += qPoints;
-  total += correct.length;
-  updateTopBar();
   stopTimer();
-
   render();
   updateAdaptiveResultBox(q, selected, correct, true);
   requestAnimationFrame(() => requestAnimationFrame(scrollMobileResultToTop));
@@ -2822,7 +2922,7 @@ document.addEventListener("keydown", event => {
 
   if(event.key === "Enter"){
     event.preventDefault();
-    if(!event.repeat) check();
+    if(!event.repeat && (practiceMode !== 'untutored' || reviewMode)) check();
     return;
   }
 
@@ -3074,7 +3174,7 @@ function loadFile(e){
         q.renderedQuestionText = null;
         q.renderedExplanationText = null;
     });
-    qIndex = 0; score = 0; total = 0; sec = 0; questionsLoaded = true; render(); startTimer();
+    qIndex = 0; score = 0; total = 0; sec = 0; questionsLoaded = true; reviewMode = false; updatePracticeModeUI(); render(); startTimer();
   };
   r.readAsText(f);
 }

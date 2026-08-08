@@ -38,6 +38,7 @@
         score:score,
         maxPoints:total,
         seconds:sec,
+        practiceMode:(typeof practiceMode !== 'undefined' ? practiceMode : 'tutored'),
         questions:DATA.questionList.map(q=>({
           submitted:Boolean(q.submitted),
           userAnswer:Array.isArray(q.userAnswer)?q.userAnswer:[],
@@ -83,7 +84,7 @@
     if (hasFinished) return;
     const snapshot = readSnapshot();
     if (!snapshot) return;
-    const attempted = snapshot.questions.filter((q) => q.submitted && Array.isArray(q.userAnswer) && q.userAnswer.length > 0).length;
+    const attempted = snapshot.questions.filter((q) => Array.isArray(q.userAnswer) && q.userAnswer.length > 0 && (snapshot.practiceMode === 'untutored' || q.submitted)).length;
     const states = getStore(STATE_KEY);
     states[testId] = { ...snapshot, title, file, attempted, finished: false, savedAt: new Date().toISOString() };
     saveStore(STATE_KEY, states);
@@ -91,6 +92,7 @@
 
   function showResult() {
     if (hasFinished) { resultScreen.classList.remove('hidden'); return; }
+    try { evalInFrame("if(typeof prepareTestForCompletion==='function') prepareTestForCompletion();"); } catch (_) {}
     const snapshot = readSnapshot();
     if (!snapshot) return;
     try { evalInFrame('stopTimer()'); } catch (_) {}
@@ -162,10 +164,13 @@
       score=__restore?Number(__restore.score||0):0;
       total=__restore?Number(__restore.maxPoints||0):0;
       sec=__restore?Number(__restore.seconds||0):0;
+      practiceMode=__restore&&__restore.practiceMode==='untutored'?'untutored':'tutored';
+      reviewMode=false;
       questionsLoaded=true;
       currentFileBaseName=${safeTitle};
       const __title=${safeTitle};
       ['testMetaLine','mobileTestMetaLine','fileName'].forEach(id=>{const el=document.getElementById(id);if(el)el.textContent=__title;});
+      if(typeof updatePracticeModeUI==='function') updatePracticeModeUI();
       const __originalCheck=check;
       check=function(){__originalCheck();window.parent.postMessage({type:'nclex-progress'},'*');};
       const __originalNextQ=nextQ;
@@ -217,7 +222,7 @@
 
   document.getElementById('reviewBtn').addEventListener('click', () => {
     resultScreen.classList.add('hidden');
-    try { evalInFrame('render()'); } catch (_) {}
+    try { evalInFrame("if(typeof enterReviewMode==='function') enterReviewMode(); else { qIndex=0; render(); }"); } catch (_) {}
   });
   document.getElementById('retakeBtn').addEventListener('click', () => {
     ready = false;
