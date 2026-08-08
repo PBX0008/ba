@@ -14,30 +14,34 @@
   <main class="selector-shell">
     <header class="selector-header">
       <h1>FINAL ASSESSMENT TESTS</h1>
-      <button class="power-button" id="clearProgressBtn" type="button" aria-label="Clear all saved progress" title="Clear all progress">
-        <span class="material-symbols-outlined" aria-hidden="true">power_settings_new</span>
-      </button>
+      <button class="reset-switch" id="clearProgressBtn" type="button" aria-label="Reset all saved progress" title="Reset all progress">Reset</button>
     </header>
 
     <section class="overview-panel" aria-label="Overall question statistics">
-      <div class="overview-stat-list overview-usage-list">
-        <div class="overview-row overview-row-plain"><span>TOTAL QUESTIONS</span><b>:</b><strong id="totalQuestions">0</strong></div>
-        <div class="overview-row"><span>USED QUESTIONS</span><b>:</b><strong id="usedQuestions">0</strong><em class="stat-pill pill-blue" id="usedPercent">0%</em></div>
-        <div class="overview-row"><span>UNUSED QUESTIONS</span><b>:</b><strong id="unusedQuestions">0</strong><em class="stat-pill pill-grey" id="unusedPercent">0%</em></div>
+      <h2 class="overview-title">Overall Statistics</h2>
+
+      <div class="overview-group overview-usage-group">
+        <div class="overview-stat-list overview-usage-list">
+          <div class="overview-row overview-row-plain"><span>TOTAL QUESTIONS</span><b>:</b><strong id="totalQuestions">0</strong></div>
+          <div class="overview-row"><span>USED QUESTIONS</span><b>:</b><strong id="usedQuestions">0</strong><em class="stat-pill pill-blue" id="usedPercent">0%</em></div>
+          <div class="overview-row"><span>UNUSED QUESTIONS</span><b>:</b><strong id="unusedQuestions">0</strong><em class="stat-pill pill-grey" id="unusedPercent">0%</em></div>
+        </div>
+
+        <div class="meter meter-large usage-meter" id="usageRing" style="--used-angle:0deg">
+          <div class="meter-core"><strong id="usagePercent">0%</strong><span>USAGE</span></div>
+        </div>
       </div>
 
-      <div class="meter meter-large usage-meter" id="usageRing" style="--used-angle:0deg">
-        <div class="meter-core"><strong id="usagePercent">0%</strong><span>USAGE</span></div>
-      </div>
+      <div class="overview-group overview-result-group">
+        <div class="overview-stat-list overview-result-list">
+          <div class="overview-row"><span>TOTAL CORRECT</span><b>:</b><strong id="totalCorrect">0</strong><em class="stat-pill pill-green" id="correctPercent">0%</em></div>
+          <div class="overview-row"><span>TOTAL INCORRECT</span><b>:</b><strong id="totalIncorrect">0</strong><em class="stat-pill pill-red" id="incorrectPercent">0%</em></div>
+          <div class="overview-row"><span>PARTIALLY INCORR.</span><b>:</b><strong id="totalPartial">0</strong><em class="stat-pill pill-yellow" id="partialPercent">0%</em></div>
+        </div>
 
-      <div class="overview-stat-list overview-result-list">
-        <div class="overview-row"><span>TOTAL CORRECT</span><b>:</b><strong id="totalCorrect">0</strong><em class="stat-pill pill-green" id="correctPercent">0%</em></div>
-        <div class="overview-row"><span>TOTAL INCORRECT</span><b>:</b><strong id="totalIncorrect">0</strong><em class="stat-pill pill-red" id="incorrectPercent">0%</em></div>
-        <div class="overview-row"><span>PARTIALLY INCORR.</span><b>:</b><strong id="totalPartial">0</strong><em class="stat-pill pill-yellow" id="partialPercent">0%</em></div>
-      </div>
-
-      <div class="meter meter-large result-meter" id="resultRing" style="--correct-end:0deg;--incorrect-end:0deg;--partial-end:0deg">
-        <div class="meter-core"><strong id="resultPercent">0%</strong><span>CORRECT</span></div>
+        <div class="meter meter-large result-meter" id="resultRing" style="--correct-end:0deg;--incorrect-end:0deg;--partial-end:0deg">
+          <div class="meter-core"><strong id="resultPercent">0%</strong><span>CORRECT</span></div>
+        </div>
       </div>
     </section>
 

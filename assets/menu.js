@@ -65,8 +65,9 @@
     return { icon:'fiber_new', label:'New' };
   }
 
-  function goToTest(test) {
+  function goToTest(test, options = {}) {
     const params = new URLSearchParams({ id:test.id, file:test.file, title:test.title || 'NCLEX RN Test' });
+    if (options.review) params.set('review', '1');
     location.href = `runner.html?${params.toString()}`;
   }
 
@@ -213,11 +214,16 @@
         restart.addEventListener('click', () => { clearTest(test); goToTest(test); });
         actions.append(resume, restart);
       } else if (s.status === 'completed') {
+        const review = document.createElement('button');
+        review.className = 'card-action review-action';
+        review.innerHTML = '<span class="material-symbols-outlined">rate_review</span>Review';
+        review.addEventListener('click', () => goToTest(test, { review:true }));
+
         const retake = document.createElement('button');
-        retake.className = 'card-action light single';
+        retake.className = 'card-action light';
         retake.innerHTML = '<span class="material-symbols-outlined">refresh</span>Retake';
         retake.addEventListener('click', () => { clearTest(test); goToTest(test); });
-        actions.append(retake);
+        actions.append(review, retake);
       } else {
         const start = document.createElement('button');
         start.className = 'card-action single';
@@ -239,7 +245,7 @@
 
   async function init() {
     $('clearProgressBtn')?.addEventListener('click', () => {
-      if (!confirm('Clear all saved test progress and results?')) return;
+      if (!confirm('Reset all saved test progress and results?')) return;
       localStorage.removeItem(RESULTS_KEY);
       localStorage.removeItem(STATE_KEY);
       results = {};
@@ -260,8 +266,13 @@
     }
   }
 
-  window.addEventListener('pageshow', (event) => {
-    if (event.persisted && catalog.length) refreshAnimated();
+  // Restart every dashboard/stat animation whenever this screen becomes visible again,
+  // including normal navigation, browser back/forward cache, and returning to the tab/app.
+  window.addEventListener('pageshow', () => {
+    if (catalog.length) refreshAnimated();
+  });
+  document.addEventListener('visibilitychange', () => {
+    if (!document.hidden && catalog.length) refreshAnimated();
   });
   init();
 })();

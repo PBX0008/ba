@@ -450,6 +450,9 @@ body.review-mode .mobile-check-cell{display:none !important;}
 body.review-mode .mobile-bottombar{grid-template-columns:1fr 1fr;}
 body.review-mode #practiceModeBtn,
 body.review-mode #mobilePracticeModeBtn{display:none !important;}
+/* Review is read-only: keep question count, but remove elapsed time from both top bars. */
+body.review-mode .top-right .status-row:first-child,
+body.review-mode .mobile-status-block .mobile-status-row:first-child{display:none !important;}
 .action-icon-btn{ justify-content:center; padding:0 14px; }
 .utility-btn{ font-size:18px; }
 .strip-separator{
@@ -2336,14 +2339,14 @@ function toggleFullscreen() {
 
 function getActualTimeSpentSeconds(q){
   if(!q) return 0;
+  // Some restored questions contain finalTimeTaken: 0 even when timeTaken is non-zero.
+  // Use the greatest valid stored per-question duration so the individual result box
+  // always reports the time actually spent on that question.
   const names = ['finalTimeTaken','timeTaken','timeSpent','timeSpentSeconds','spentSeconds'];
-  for(const name of names){
-    const val = q[name];
-    if(val !== undefined && val !== null && val !== '' && Number.isFinite(Number(val))){
-      return Math.max(0, Math.round(Number(val)));
-    }
-  }
-  return 0;
+  const values = names
+    .map(name => Number(q[name]))
+    .filter(value => Number.isFinite(value) && value >= 0);
+  return values.length ? Math.max(...values.map(value => Math.round(value))) : 0;
 }
 
 function formatSecondsShort(seconds){

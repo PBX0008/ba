@@ -6,11 +6,12 @@
   const testId = params.get('id') || 'unknown-test';
   const file = params.get('file') || '';
   const title = params.get('title') || 'NCLEX RN Test';
+  const reviewRequested = params.get('review') === '1';
   const frame = document.getElementById('testFrame');
   const loading = document.getElementById('loadingScreen');
   const resultScreen = document.getElementById('resultScreen');
   let ready = false;
-  let hasFinished = false;
+  let hasFinished = reviewRequested;
 
   const getStore = (key) => { try { return JSON.parse(localStorage.getItem(key) || '{}') || {}; } catch (_) { return {}; } };
   const saveStore = (key, value) => localStorage.setItem(key, JSON.stringify(value));
@@ -140,7 +141,9 @@
 
   function installBridge(data) {
     const states = getStore(STATE_KEY);
-    const restored = states[testId] && !states[testId].finished ? states[testId] : null;
+    const restored = reviewRequested
+      ? (states[testId] || null)
+      : (states[testId] && !states[testId].finished ? states[testId] : null);
     const payload = JSON.stringify(data).replace(/\u2028/g, '\\u2028').replace(/\u2029/g, '\\u2029');
     const restorePayload = JSON.stringify(restored || null).replace(/\u2028/g, '\\u2028').replace(/\u2029/g, '\\u2029');
     const safeTitle = JSON.stringify(title);
@@ -172,22 +175,34 @@
       ['testMetaLine','mobileTestMetaLine','fileName'].forEach(id=>{const el=document.getElementById(id);if(el)el.textContent=__title;});
       if(typeof updatePracticeModeUI==='function') updatePracticeModeUI();
       const __originalCheck=check;
-      check=function(){__originalCheck();window.parent.postMessage({type:'nclex-progress'},'*');};
+      check=function(){
+        __originalCheck();
+        if(!reviewMode) window.parent.postMessage({type:'nclex-progress'},'*');
+      };
       const __originalNextQ=nextQ;
       nextQ=function(){
+        if(reviewMode){ __originalNextQ(); return; }
         if(qIndex>=DATA.questionList.length-1){window.parent.postMessage({type:'nclex-finish'},'*');return;}
         __originalNextQ();window.parent.postMessage({type:'nclex-progress'},'*');
       };
       const __originalPrevQ=prevQ;
-      prevQ=function(){__originalPrevQ();window.parent.postMessage({type:'nclex-progress'},'*');};
-      endTest=function(){window.parent.postMessage({type:'nclex-finish'},'*');};
+      prevQ=function(){
+        __originalPrevQ();
+        if(!reviewMode) window.parent.postMessage({type:'nclex-progress'},'*');
+      };
+      endTest=function(){if(!reviewMode) window.parent.postMessage({type:'nclex-finish'},'*');};
       suspendTest=function(){window.parent.postMessage({type:'nclex-suspend'},'*');};
       triggerFileLoad=function(){};
       openNotes=function(){};
       openFeedback=function(){};
       aiSearch=function(){};
       closeAI=function(){const modal=document.getElementById('aiModal');if(modal)modal.classList.remove('active');};
-      render();syncTimerForCurrentQuestion();
+      if(${reviewRequested ? 'true' : 'false'}){
+        if(typeof enterReviewMode==='function') enterReviewMode();
+        else { reviewMode=true; qIndex=0; if(typeof updatePracticeModeUI==='function') updatePracticeModeUI(); render(); }
+      } else {
+        render();syncTimerForCurrentQuestion();
+      }
     `);
   }
 
