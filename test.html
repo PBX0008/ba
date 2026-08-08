@@ -445,6 +445,11 @@ body.untutored-mode .mobile-check-cell{display:none !important;}
 body.untutored-mode .mobile-bottombar{grid-template-columns:1fr 1fr;}
 body.untutored-mode .main:not(.review-active) #rightPanel{display:none !important;}
 body.untutored-mode .main:not(.review-active){grid-template-columns:1fr 0 0 !important;}
+body.review-mode .check-btn,
+body.review-mode .mobile-check-cell{display:none !important;}
+body.review-mode .mobile-bottombar{grid-template-columns:1fr 1fr;}
+body.review-mode #practiceModeBtn,
+body.review-mode #mobilePracticeModeBtn{display:none !important;}
 .action-icon-btn{ justify-content:center; padding:0 14px; }
 .utility-btn{ font-size:18px; }
 .strip-separator{
@@ -1985,7 +1990,7 @@ body.text-size-3 { --desktop-content-size: 19px; --desktop-content-line: 1.72; }
       <span class="material-symbols-outlined" aria-hidden="true">calculate</span>
     </button>
     <button id="mobilePracticeModeBtn" class="mobile-icon-btn mobile-mode-btn" type="button" onclick="togglePracticeMode()" aria-label="Toggle tutored or untutored mode" title="Toggle practice mode">
-      <span class="mode-dot" aria-hidden="true"></span><span class="mode-label">Tutored</span>
+      <span class="mode-label">Tutored</span>
     </button>
   </div>
   <div class="mobile-strip-group">
@@ -2011,7 +2016,7 @@ body.text-size-3 { --desktop-content-size: 19px; --desktop-content-line: 1.72; }
     <button class="strip-btn" type="button" onclick="suspendTest()"><span><span class="material-symbols-outlined google-icon" aria-hidden="true">pause_circle</span> Pause</span></button>
     <span class="strip-separator"></span>
     <button class="strip-btn" type="button" onclick="openCalc()"><span><span class="material-symbols-outlined google-icon" aria-hidden="true">calculate</span> Calc.</span></button>
-    <button id="practiceModeBtn" class="strip-btn practice-mode-btn" type="button" onclick="togglePracticeMode()" aria-label="Toggle tutored or untutored mode" title="Toggle practice mode"><span><span class="mode-dot" aria-hidden="true"></span><span class="mode-label">Tutored</span></span></button>
+    <button id="practiceModeBtn" class="strip-btn practice-mode-btn" type="button" onclick="togglePracticeMode()" aria-label="Toggle tutored or untutored mode" title="Toggle practice mode"><span><span class="mode-label">Tutored</span></span></button>
 
   </div>
   <div class="calc-right">
@@ -2220,8 +2225,16 @@ function syncTimerForCurrentQuestion(){
 function updatePracticeModeUI(){
   const untutored = practiceMode === 'untutored';
   document.body.classList.toggle('untutored-mode', untutored && !reviewMode);
+  document.body.classList.toggle('review-mode', !!reviewMode);
   const mainEl = document.querySelector('.main');
   if(mainEl) mainEl.classList.toggle('review-active', !!reviewMode);
+
+  const mobileTitle = document.querySelector('.mobile-app-title');
+  const desktopTitle = document.querySelector('.top-left-title');
+  if(mobileTitle) mobileTitle.textContent = reviewMode ? 'REVIEW MODE' : 'NCLEX-RN';
+  if(desktopTitle) desktopTitle.innerHTML = reviewMode ? 'REVIEW MODE<br>READINESS ASSESSMENT' : 'NCLEX-RN<br>READINESS ASSESSMENT';
+  document.title = reviewMode ? 'REVIEW MODE' : 'NCLEX-RN';
+
   [document.getElementById('practiceModeBtn'), document.getElementById('mobilePracticeModeBtn')].forEach(btn=>{
     if(!btn) return;
     btn.classList.toggle('untutored', untutored);
@@ -2447,6 +2460,15 @@ function scrollMobileResultToTop(){
   const mainScroller = document.querySelector('.main');
   const resultBox = document.getElementById('questionResultBox');
   if(!mainScroller) return;
+
+  // Review should always open each item with the question visible. Never auto-scroll
+  // the per-question result box to the top while reviewing.
+  if(reviewMode){
+    if(mobileResultScrollFrame) cancelAnimationFrame(mobileResultScrollFrame);
+    mobileResultScrollFrame = 0;
+    mainScroller.scrollTop = 0;
+    return;
+  }
 
   const resultIsVisible = resultBox &&
     getComputedStyle(resultBox).display !== 'none' &&
@@ -2877,7 +2899,7 @@ function render(){
 
 function check(){
   const q = DATA.questionList[qIndex];
-  if(!q || q.submitted || (practiceMode === 'untutored' && !reviewMode)) return;
+  if(reviewMode || !q || q.submitted || practiceMode === 'untutored') return;
   q.finalTimeTaken = getActualTimeSpentSeconds(q);
   q.submitted = true;
   q.lastUpdated = new Date().toISOString();
@@ -2922,7 +2944,7 @@ document.addEventListener("keydown", event => {
 
   if(event.key === "Enter"){
     event.preventDefault();
-    if(!event.repeat && (practiceMode !== 'untutored' || reviewMode)) check();
+    if(!event.repeat && !reviewMode && practiceMode !== 'untutored') check();
     return;
   }
 
