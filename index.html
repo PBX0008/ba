@@ -7,11 +7,20 @@
     <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
     <meta name="description" content="NCLEX RN learning software launch page" />
     <meta name="theme-color" content="#0067A9" />
+    <link rel="manifest" href="manifest.webmanifest" />
+    <link rel="icon" type="image/png" sizes="32x32" href="assets/icons/favicon-32.png" />
+    <link rel="apple-touch-icon" sizes="180x180" href="assets/icons/apple-touch-icon.png" />
+    <meta name="mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+    <meta name="apple-mobile-web-app-title" content="NCLEX-RN" />
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Rounded:opsz,wght,FILL,GRAD@24,400,1,0" />
     <link rel="stylesheet" href="assets/css/main.css" />
     <script src="assets/auth.js"></script>
+    <script src="assets/haptics.js" defer></script>
+    <script src="assets/pwa.js" defer></script>
     <noscript><link rel="stylesheet" href="assets/css/noscript.css" /></noscript>
   </head>
   <body class="is-preload">
@@ -54,7 +63,31 @@
               </div>
             </div>
           </section>
+
+          <section class="pwa-install-panel" id="pwaInstallPanel" aria-label="Install NCLEX-RN app">
+            <div class="pwa-install-main">
+              <img class="pwa-install-icon" src="assets/icons/icon-192.png" alt="" aria-hidden="true" />
+              <div class="pwa-install-copy">
+                <strong>INSTALL NCLEX-RN APP</strong>
+                <span id="pwaInstallStatus">Install once for a full-screen app experience and faster access.</span>
+              </div>
+              <button class="pwa-install-button" id="pwaInstallButton" type="button">
+                <span class="material-symbols-rounded" aria-hidden="true">download</span>
+                <span>INSTALL</span>
+              </button>
+            </div>
+          </section>
+
         </header>
+
+        <div class="pwa-install-help" id="pwaInstallHelp" role="dialog" aria-modal="true" aria-labelledby="pwaInstallHelpTitle" aria-hidden="true" hidden>
+          <div class="pwa-install-help-backdrop" data-install-help-backdrop></div>
+          <section class="pwa-install-help-card">
+            <button class="pwa-install-help-close" type="button" data-install-help-close aria-label="Close installation instructions">×</button>
+            <h2 id="pwaInstallHelpTitle">Install NCLEX-RN</h2>
+            <p data-install-help-body></p>
+          </section>
+        </div>
         <footer id="footer">
           <span class="copyright">
             <span class="material-symbols-rounded footer-icon" aria-hidden="true">verified</span>
@@ -139,6 +172,7 @@
           submitButton.disabled = false;
 
           if (!result.ok) {
+            if (window.PBXHaptics) window.PBXHaptics.error();
             const message = result.reason === 'storage'
               ? 'Authentication cannot be saved because local browser storage is unavailable.'
               : 'Invalid or expired password. Use the password for the current IST time.';
@@ -147,6 +181,7 @@
             return;
           }
 
+          if (window.PBXHaptics) window.PBXHaptics.confirm();
           startCountdown();
         });
 

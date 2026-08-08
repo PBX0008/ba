@@ -2252,3 +2252,114 @@ body {
   .device-auth-entry input,
   .device-auth-entry button { height: 2.35rem; min-height: 2.35rem; }
 }
+
+
+/* PBX PWA INSTALL */
+.pwa-install-panel {
+  width: min(560px, calc(100vw - 32px));
+  margin: 12px auto 0;
+  padding: 0;
+  text-align: left;
+}
+.pwa-install-main {
+  display: grid;
+  grid-template-columns: 48px minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 12px;
+  padding: 10px 12px;
+  border-radius: 14px;
+  background: rgba(255,255,255,.96);
+  border: 1px solid rgba(255,255,255,.72);
+  box-shadow: 0 10px 28px rgba(0,0,0,.18);
+  color: #0b1d33;
+}
+.pwa-install-icon {
+  width: 48px;
+  height: 48px;
+  display: block;
+  border-radius: 12px;
+  object-fit: cover;
+  box-shadow: 0 3px 10px rgba(0,0,0,.18);
+}
+.pwa-install-copy { min-width: 0; display: flex; flex-direction: column; gap: 3px; }
+.pwa-install-copy strong { font-size: 12px; line-height: 1.15; letter-spacing: .045em; color: #071e3f; }
+.pwa-install-copy span { font-size: 11px; line-height: 1.3; color: #4b6075; }
+.pwa-install-button {
+  appearance: none;
+  border: 0;
+  min-height: 38px;
+  border-radius: 10px;
+  padding: 0 13px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 5px;
+  background: #071e3f;
+  color: #fff;
+  font: inherit;
+  font-size: 11px;
+  font-weight: 800;
+  letter-spacing: .04em;
+  cursor: pointer;
+  transition: transform .18s ease, opacity .18s ease, box-shadow .18s ease;
+  box-shadow: 0 4px 12px rgba(7,30,63,.25);
+}
+.pwa-install-button .material-symbols-rounded { font-size: 18px; }
+.pwa-install-button:active { transform: scale(.97); }
+.pwa-install-panel.is-installed .pwa-install-button { background: #166534; cursor: default; box-shadow: none; }
+.pwa-install-panel.is-installed .pwa-install-copy strong { color: #166534; }
+.pwa-install-help {
+  position: fixed;
+  inset: 0;
+  z-index: 10000;
+  display: grid;
+  place-items: center;
+  padding: 20px;
+  opacity: 0;
+  transition: opacity .18s ease;
+}
+.pwa-install-help[hidden] { display: none; }
+.pwa-install-help.is-open { opacity: 1; }
+.pwa-install-help-backdrop { position: absolute; inset: 0; background: rgba(0,0,0,.46); }
+.pwa-install-help-card {
+  position: relative;
+  z-index: 1;
+  width: min(430px, calc(100vw - 32px));
+  padding: 24px 22px 20px;
+  border-radius: 16px;
+  background: #fff;
+  color: #111827;
+  box-shadow: 0 24px 60px rgba(0,0,0,.3);
+  transform: translateY(8px) scale(.985);
+  transition: transform .18s ease;
+  text-align: left;
+}
+.pwa-install-help.is-open .pwa-install-help-card { transform: translateY(0) scale(1); }
+.pwa-install-help-card h2 { margin: 0 34px 10px 0; font-size: 19px; color: #071e3f; }
+.pwa-install-help-card p { margin: 0; font-size: 14px; line-height: 1.55; color: #374151; }
+.pwa-install-help-close {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  width: 34px;
+  height: 34px;
+  padding: 0;
+  border: 0;
+  border-radius: 50%;
+  background: #eef2f7;
+  color: #111827;
+  font-size: 24px;
+  line-height: 1;
+  cursor: pointer;
+}
+@media screen and (max-width: 520px) {
+  .pwa-install-panel { width: min(94vw, 460px); margin-top: 10px; }
+  .pwa-install-main { grid-template-columns: 42px minmax(0,1fr); gap: 9px 10px; padding: 9px 10px; }
+  .pwa-install-icon { width: 42px; height: 42px; border-radius: 10px; }
+  .pwa-install-button { grid-column: 1 / -1; width: 100%; min-height: 36px; }
+  .pwa-install-copy strong { font-size: 11px; }
+  .pwa-install-copy span { font-size: 10px; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .pwa-install-button, .pwa-install-help, .pwa-install-help-card { transition: none !important; }
+}
