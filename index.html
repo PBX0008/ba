@@ -64,21 +64,16 @@
             </div>
           </section>
 
-          <section class="pwa-install-panel" id="pwaInstallPanel" aria-label="Install NCLEX-RN app">
-            <div class="pwa-install-main">
-              <img class="pwa-install-icon" src="assets/icons/icon-192.png" alt="" aria-hidden="true" />
-              <div class="pwa-install-copy">
-                <strong>INSTALL NCLEX-RN APP</strong>
-                <span id="pwaInstallStatus">Install once for a full-screen app experience and faster access.</span>
-              </div>
-              <button class="pwa-install-button" id="pwaInstallButton" type="button">
-                <span class="material-symbols-rounded" aria-hidden="true">download</span>
-                <span>INSTALL</span>
-              </button>
-            </div>
-          </section>
-
         </header>
+
+        <aside class="pwa-install-toast" id="pwaInstallToast" aria-label="Install NCLEX-RN app" aria-live="polite" hidden>
+          <img class="pwa-install-toast-icon" src="assets/icons/icon-192.png" alt="" aria-hidden="true" />
+          <div class="pwa-install-toast-copy">
+            <strong>Install NCLEX-RN App</strong>
+            <span>Add it to your device for faster full-screen access.</span>
+          </div>
+          <button class="pwa-install-toast-button" id="pwaInstallButton" type="button">INSTALL</button>
+        </aside>
 
         <div class="pwa-install-help" id="pwaInstallHelp" role="dialog" aria-modal="true" aria-labelledby="pwaInstallHelpTitle" aria-hidden="true" hidden>
           <div class="pwa-install-help-backdrop" data-install-help-backdrop></div>
