@@ -1947,14 +1947,11 @@ body.text-size-3 { --desktop-content-size: 19px; --desktop-content-line: 1.72; }
 
 <div class="mobile-calc-strip" aria-label="Mobile test tools">
   <div class="mobile-strip-group">
-    <button class="mobile-icon-btn" type="button" onclick="openNotes()" aria-label="Notes">
-      <span class="material-symbols-outlined" aria-hidden="true">edit_square</span>
+    <button class="mobile-icon-btn" type="button" onclick="suspendTest()" aria-label="Pause test" title="Pause test">
+      <span class="material-symbols-outlined" aria-hidden="true">pause_circle</span>
     </button>
     <button class="mobile-icon-btn" type="button" onclick="openCalc()" aria-label="Calculator">
       <span class="material-symbols-outlined" aria-hidden="true">calculate</span>
-    </button>
-    <button class="mobile-icon-btn" type="button" onclick="openFeedback()" aria-label="Feedback">
-      <span class="material-symbols-outlined" aria-hidden="true">chat_bubble_outline</span>
     </button>
   </div>
   <div class="mobile-strip-group">
@@ -1972,19 +1969,15 @@ body.text-size-3 { --desktop-content-size: 19px; --desktop-content-line: 1.72; }
     <button class="mobile-icon-btn" type="button" onclick="toggleNightMode()" aria-label="Day and night mode">
       <span class="material-symbols-outlined" aria-hidden="true">dark_mode</span>
     </button>
-    <button id="mobileMarkReviewBtn" class="mobile-icon-btn mobile-mark-review-btn" type="button" onclick="toggleMarkForReview()" aria-label="Mark for review">
-      <span class="material-symbols-outlined" aria-hidden="true">outlined_flag</span>
-    </button>
   </div>
 </div>
 
 <div class="calc-strip">
   <div class="calc-left">
-    <button class="strip-btn" type="button" onclick="openNotes()"><span><span class="material-symbols-outlined google-icon" aria-hidden="true">note_alt</span> Notes</span></button>
+    <button class="strip-btn" type="button" onclick="suspendTest()"><span><span class="material-symbols-outlined google-icon" aria-hidden="true">pause_circle</span> Pause</span></button>
     <span class="strip-separator"></span>
     <button class="strip-btn" type="button" onclick="openCalc()"><span><span class="material-symbols-outlined google-icon" aria-hidden="true">calculate</span> Calc.</span></button>
-    <span class="strip-separator"></span>
-    <button class="strip-btn" type="button" onclick="openFeedback()"><span><span class="material-symbols-outlined google-icon" aria-hidden="true">forum</span> Feedback</span></button>
+
   </div>
   <div class="calc-right">
     <input id="fileLoader" class="hidden-file-input" type="file" accept=".txt,.json" onchange="loadFile(event)">
@@ -2001,8 +1994,7 @@ body.text-size-3 { --desktop-content-size: 19px; --desktop-content-line: 1.72; }
     </div>
     <span class="strip-separator"></span>
     <button class="strip-btn action-icon-btn utility-btn icon-only" type="button" onclick="toggleNightMode()" aria-label="Day and Night"><span class="material-symbols-outlined google-icon" aria-hidden="true">dark_mode</span></button>
-    <span class="strip-separator"></span>
-    <button id="markReviewBtn" class="strip-btn mark-review-btn" type="button" onclick="toggleMarkForReview()"><span><span class="material-symbols-outlined google-icon" aria-hidden="true">flag</span> Mark for Review</span></button>
+
   </div>
 </div>
 
@@ -2068,11 +2060,7 @@ body.text-size-3 { --desktop-content-size: 19px; --desktop-content-line: 1.72; }
 </div>
 
 <div class="bottombar">
-  <div class="bottom-left">
-    <button type="button" onclick="endTest()"><span class="material-symbols-outlined google-icon" aria-hidden="true">logout</span> End</button>
-    <span class="footer-separator"></span>
-    <button type="button" onclick="suspendTest()"><span class="material-symbols-outlined google-icon" aria-hidden="true">pause_circle</span> Pause</button>
-  </div>
+  <div class="bottom-left"></div>
   <div class="bottom-right">
     <button type="button" onclick="prevQ()"><span class="material-symbols-outlined google-icon" aria-hidden="true">arrow_back</span> Previous</button>
     <span class="footer-separator"></span>

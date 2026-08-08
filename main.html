@@ -3,69 +3,46 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
-  <meta name="theme-color" content="#0067A9" />
+  <meta name="theme-color" content="#002365" />
   <title>NCLEX RN — Question Selection</title>
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" rel="stylesheet" />
+  <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,300..700,0..1,-50..200" rel="stylesheet" />
   <link rel="stylesheet" href="assets/menu.css" />
 </head>
 <body>
-  <header class="topbar">
-    <div class="topbar-inner">
-      <a class="icon-button" href="index.html" aria-label="Back to welcome screen" title="Back">
-        <span class="material-symbols-outlined">arrow_back_ios_new</span>
-      </a>
-      <div class="brand"><strong>NCLEX RN</strong><span>Question Selection</span></div>
-      <button class="icon-button" id="themeBtn" type="button" aria-label="Toggle dark mode" title="Dark mode">
-        <span class="material-symbols-outlined">dark_mode</span>
+  <main class="selector-shell">
+    <header class="selector-header">
+      <h1>FINAL ASSESSMENT TESTS</h1>
+      <button class="power-button" id="clearProgressBtn" type="button" aria-label="Clear all saved progress" title="Clear all progress">
+        <span class="material-symbols-outlined" aria-hidden="true">power_settings_new</span>
       </button>
-    </div>
-  </header>
+    </header>
 
-  <main class="app-shell">
-    <section class="dashboard-card" aria-labelledby="catalogTitle">
-      <div class="dashboard-card-head">
-        <div>
-          <p class="eyebrow">Question Bank</p>
-          <h1 id="catalogTitle">Final Assessment Tests</h1>
-        </div>
-        <button class="icon-button dashboard-reset" id="clearProgressBtn" type="button" aria-label="Clear saved progress" title="Clear progress">
-          <span class="material-symbols-outlined">restart_alt</span>
-        </button>
+    <section class="overview-panel" aria-label="Overall question statistics">
+      <div class="overview-stat-list overview-usage-list">
+        <div class="overview-row overview-row-plain"><span>TOTAL QUESTIONS</span><b>:</b><strong id="totalQuestions">0</strong></div>
+        <div class="overview-row"><span>USED QUESTIONS</span><b>:</b><strong id="usedQuestions">0</strong><em class="stat-pill pill-blue" id="usedPercent">0%</em></div>
+        <div class="overview-row"><span>UNUSED QUESTIONS</span><b>:</b><strong id="unusedQuestions">0</strong><em class="stat-pill pill-grey" id="unusedPercent">0%</em></div>
       </div>
 
-      <section class="dashboard-section dashboard-top" aria-label="Question usage overview">
-        <div class="dashboard-donut dashboard-donut-usage" id="usageRing" style="--used-angle:0deg;">
-          <span><strong id="usagePercent">0%</strong><small>Usage</small></span>
-        </div>
-        <div class="dashboard-stat-list">
-          <div class="dashboard-stat-row no-badge"><span class="dashboard-label">Total Questions</span><span class="dashboard-colon">:</span><strong class="dashboard-value" id="totalQuestions">0</strong></div>
-          <div class="dashboard-stat-row"><span class="dashboard-label">Used Questions</span><span class="dashboard-colon">:</span><strong class="dashboard-value" id="usedQuestions">0</strong><span class="dashboard-badge badge-primary" id="usedPercent">0%</span></div>
-          <div class="dashboard-stat-row"><span class="dashboard-label">Unused Questions</span><span class="dashboard-colon">:</span><strong class="dashboard-value" id="unusedQuestions">0</strong><span class="dashboard-badge badge-muted" id="unusedPercent">0%</span></div>
-        </div>
-      </section>
-
-      <section class="dashboard-section dashboard-bottom" aria-label="Question result overview">
-        <div class="dashboard-stat-list">
-          <div class="dashboard-stat-row"><span class="dashboard-label">Total Correct</span><span class="dashboard-colon">:</span><strong class="dashboard-value" id="totalCorrect">0</strong><span class="dashboard-badge badge-correct" id="correctPercent">0%</span></div>
-          <div class="dashboard-stat-row"><span class="dashboard-label">Total Incorrect</span><span class="dashboard-colon">:</span><strong class="dashboard-value" id="totalIncorrect">0</strong><span class="dashboard-badge badge-incorrect" id="incorrectPercent">0%</span></div>
-          <div class="dashboard-stat-row"><span class="dashboard-label">Partially Incorr.</span><span class="dashboard-colon">:</span><strong class="dashboard-value" id="totalPartial">0</strong><span class="dashboard-badge badge-partial" id="partialPercent">0%</span></div>
-        </div>
-        <div class="dashboard-donut dashboard-donut-questions" id="resultRing" style="--correct-end:0deg;--incorrect-end:0deg;--partial-end:0deg;">
-          <span><strong id="resultPercent">0%</strong><small>Correct</small></span>
-        </div>
-      </section>
-    </section>
-
-    <section class="catalog-section" aria-labelledby="availableTestsTitle">
-      <div class="section-heading">
-        <div><p class="eyebrow">Available Files</p><h2 id="availableTestsTitle">Select a test</h2></div>
-        <span class="test-count" id="testCount">0 tests</span>
+      <div class="meter meter-large usage-meter" id="usageRing" style="--used-angle:0deg">
+        <div class="meter-core"><strong id="usagePercent">0%</strong><span>USAGE</span></div>
       </div>
-      <div class="notice hidden" id="notice" role="status"></div>
-      <div class="test-grid" id="testGrid"></div>
+
+      <div class="overview-stat-list overview-result-list">
+        <div class="overview-row"><span>TOTAL CORRECT</span><b>:</b><strong id="totalCorrect">0</strong><em class="stat-pill pill-green" id="correctPercent">0%</em></div>
+        <div class="overview-row"><span>TOTAL INCORRECT</span><b>:</b><strong id="totalIncorrect">0</strong><em class="stat-pill pill-red" id="incorrectPercent">0%</em></div>
+        <div class="overview-row"><span>PARTIALLY INCORR.</span><b>:</b><strong id="totalPartial">0</strong><em class="stat-pill pill-yellow" id="partialPercent">0%</em></div>
+      </div>
+
+      <div class="meter meter-large result-meter" id="resultRing" style="--correct-end:0deg;--incorrect-end:0deg;--partial-end:0deg">
+        <div class="meter-core"><strong id="resultPercent">0%</strong><span>CORRECT</span></div>
+      </div>
     </section>
+
+    <div class="notice hidden" id="notice" role="status"></div>
+    <section class="test-grid" id="testGrid" aria-label="Available tests"></section>
   </main>
 
   <script src="assets/menu.js"></script>

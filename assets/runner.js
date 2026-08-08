@@ -130,7 +130,6 @@
     setText('resultPoints', `${result.points} / ${result.maxPoints}`);
     setText('resultTime', formatTime(result.seconds));
     setText('resultAverage', formatTime(result.averageSeconds));
-    setText('resultMarked', result.marked);
     document.getElementById('completionRing').style.setProperty('--used-angle', `${attemptedP * 3.6}deg`);
     document.getElementById('scoreRing').style.setProperty('--correct-end', `${correctP * 3.6}deg`);
     document.getElementById('scoreRing').style.setProperty('--incorrect-end', `${(correctP + incorrectP) * 3.6}deg`);
