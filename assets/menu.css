@@ -44,3 +44,21 @@ button{font:inherit;-webkit-tap-highlight-color:transparent}
 @media(max-width:1100px){.overview-panel{margin-left:18px;margin-right:18px;grid-template-columns:minmax(230px,1fr) 116px minmax(220px,1fr) 116px;gap:12px}.meter-large{width:102px}.test-grid{gap:15px}.test-card{height:215px}.card-row{grid-template-columns:minmax(105px,1fr) 50px 39px;font-size:11px}}
 @media(max-width:850px){.overview-panel{grid-template-columns:1fr 112px;grid-template-areas:"useStats useRing" "resultStats resultRing";gap:16px}.overview-usage-list{grid-area:useStats}.usage-meter{grid-area:useRing}.overview-result-list{grid-area:resultStats}.result-meter{grid-area:resultRing}.test-grid{grid-template-columns:repeat(2,minmax(0,1fr))}}
 @media(max-width:600px){.selector-shell{width:calc(100% - 16px);padding-top:11px}.selector-header{height:35px;padding-left:4px;padding-right:1px}.selector-header h1{font-size:13px}.overview-panel{margin:0 0 12px;padding:12px;grid-template-columns:minmax(0,1fr) 92px;gap:12px;border-radius:16px}.meter-large{width:82px}.meter{box-shadow:0 0 0 4px #c8dfef,0 0 0 6px #7caacb,0 3px 7px rgba(46,91,130,.2)}.meter::before{inset:7px}.meter-core strong{font-size:17px}.meter-core span{margin-top:6px;font-size:8px}.overview-row{grid-template-columns:minmax(115px,1fr) 7px 38px 44px;gap:4px;font-size:10px}.overview-row-plain{grid-template-columns:minmax(115px,1fr) 7px 38px}.overview-row>strong{font-size:10px}.stat-pill{min-width:38px;font-size:8px}.test-grid{grid-template-columns:1fr;gap:12px}.test-card{height:198px;border-radius:16px}.test-card h2{font-size:15px}.status-pill{height:23px;font-size:9px}.card-body{grid-template-columns:minmax(0,1fr) 82px}.card-row{font-size:11px}.card-meter{width:68px}.card-action{height:33px}}
+
+/* PBX Nursing footer */
+.pbx-footer{
+  width:100%;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  text-align:center;
+  color:#365f80;
+  font-size:12px;
+  font-weight:650;
+}
+.selector-footer{margin-top:27px;padding:14px 10px calc(4px + env(safe-area-inset-bottom,0px));}
+.pbx-footer-line{display:inline-flex;align-items:center;justify-content:center;flex-wrap:wrap;gap:4px;line-height:1.35;}
+.pbx-footer-icon{font-size:16px;color:#246f9f;font-variation-settings:"FILL" 1;}
+.pbx-footer a{color:#153e67;font-weight:900;text-decoration:none;border-bottom:1px solid rgba(21,62,103,.34);}
+.pbx-footer a:hover{border-bottom-color:#153e67;}
+@media(max-width:600px){.selector-footer{margin-top:18px;padding-top:11px}.pbx-footer{font-size:10.5px}.pbx-footer-icon{font-size:14px}}
