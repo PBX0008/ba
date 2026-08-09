@@ -134,7 +134,7 @@
     card.querySelector('[data-pct="correct"]')?.replaceChildren(document.createTextNode(`${cP}%`));
     card.querySelector('[data-pct="incorrect"]')?.replaceChildren(document.createTextNode(`${iP}%`));
     card.querySelector('[data-pct="partial"]')?.replaceChildren(document.createTextNode(`${pP}%`));
-    card.querySelector('[data-meter-label]')?.replaceChildren(document.createTextNode(`${useP}%`));
+    card.querySelector('[data-meter-label]')?.replaceChildren(document.createTextNode(`${cP}%`));
 
     const meter = card.querySelector('.card-meter');
     if (meter) {
@@ -289,7 +289,7 @@
             <div class="card-row"><span class="label">PARTIALLY INCORR:</span><span class="value" data-stat="partial">0</span><em class="mini-pill pill-yellow" data-pct="partial">0%</em></div>
           </div>
           <div class="meter card-meter">
-            <div class="meter-core"><strong data-meter-label>0%</strong><span>USED</span></div>
+            <div class="meter-core"><strong data-meter-label>0%</strong><span>Correct</span></div>
           </div>
         </div>
         <div class="card-actions"></div>`;
